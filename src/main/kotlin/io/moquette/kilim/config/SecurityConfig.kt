@@ -7,10 +7,12 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
+
 
 @Configuration
 @EnableWebSecurity
@@ -19,7 +21,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
     //    @Autowired
     //    UserDetailsService customUserService;
 
-    @Bean
+    /*@Bean
     fun successHandler(): AuthenticationSuccessHandler {
         return object : SimpleUrlAuthenticationSuccessHandler() {
             override fun determineTargetUrl(request: HttpServletRequest, response: HttpServletResponse?): String {
@@ -33,6 +35,38 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
                 //                return super.determineTargetUrl(request, response);
             }
         }
+    }*/
+    @Bean
+    fun successHandler(): AuthenticationSuccessHandler {
+        return object : SimpleUrlAuthenticationSuccessHandler() {
+            protected fun determineTargetUrl(authentication: Authentication): String {
+                var isUser = false
+                var isAdmin = false
+                val authorities = authentication.authorities
+                for (grantedAuthority in authorities) {
+                    if (grantedAuthority.authority == "ROLE_USER") {
+                        isUser = true
+                        break
+                    } else if (grantedAuthority.authority == "ROLE_ADMIN") {
+                        isAdmin = true
+                        break
+                    }
+                }
+
+                return if (isUser) {
+                    "/projects"
+                } else if (isAdmin) {
+                    "/admin/console"
+                } else {
+                    throw IllegalStateException()
+                }
+            }
+
+            override fun handle(request: HttpServletRequest?, response: HttpServletResponse?, authentication: Authentication?) {
+                val targetUrl = determineTargetUrl(authentication!!)
+                this.redirectStrategy.sendRedirect(request, response, targetUrl)
+            }
+        }
     }
 
     @Throws(Exception::class)
@@ -40,13 +74,13 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
         http.formLogin()
                 .loginPage("/login")
                 .successHandler(successHandler())
-                .and()
+            .and()
                 .logout()
                 .logoutSuccessUrl("/index.html")
-                .and()
+            .and()
                 .authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/projects").hasRole("REQUESTER")//.authenticated()
-                //                .antMatchers("/tasker/requests").hasRole("TASKER")
+                .antMatchers(HttpMethod.POST, "/projects").hasRole("USER")//.authenticated()
+                .antMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().permitAll()
 
         //WARN only in Dev mode
@@ -57,14 +91,16 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
 
     @Throws(Exception::class)
     override fun configure(auth: AuthenticationManagerBuilder?) {
-        //just for dev test
+        //just for dev test, here the password are encoded with NoOpPasswordEncoder
         auth!!.inMemoryAuthentication()
-                .withUser("user").password("{noop}pwd").roles("REQUESTER")// use NoOpPasswordEncoder or:
-        //        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-        //        manager.createUser(User.withDefaultPasswordEncoder().username("user").password("user").roles("USER").build());
-        //        return manager;
-        //                .and()
-        //                .withUser("tasker").password("pwd").roles("TASKER")
-        //auth.userDetailsService(this.customUserService);
+                .withUser("user").password("{noop}pwd").roles("USER").and()
+                .withUser("admin").password("{noop}pwd").roles("ADMIN")
+// use NoOpPasswordEncoder or:
+//        InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
+//        manager.createUser(User.withDefaultPasswordEncoder().username("user").password("user").roles("USER").build());
+//        return manager;
+//                .and()
+//                .withUser("tasker").password("pwd").roles("TASKER")
+//auth.userDetailsService(this.customUserService);
     }
 }
