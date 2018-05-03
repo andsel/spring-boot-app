@@ -1,0 +1,12 @@
+security:
+  user:
+    password: password
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+
+# To disable thymeleaf caching, only for development
+spring:
+  thymeleaf:
+    cache: false
