@@ -10,3 +10,8 @@ logging:
 spring:
   thymeleaf:
     cache: false
+
+#H2Console
+#  h2:
+#    console:
+#      enabled: true
