@@ -2,16 +2,21 @@ security:
   user:
     password: password
 
-logging:
-  level:
-    org.springframework.web: DEBUG
+#logging:
+#  level:
+#    org.springframework.web: DEBUG
 
 # To disable thymeleaf caching, only for development
 spring:
   thymeleaf:
     cache: false
+  datasource:
+    initialize: true
+    schema: classpath:sql/schema.sql
+    data: classpath:sql/data.sql
 
 #H2Console
 #  h2:
 #    console:
 #      enabled: true
+#      path: /h2console
