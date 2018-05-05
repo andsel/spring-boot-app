@@ -1,17 +1,19 @@
 package io.moquette.kilim.config
 
-import io.moquette.kilim.model.IUserRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler
 import javax.servlet.http.HttpServletRequest
@@ -23,7 +25,21 @@ import javax.servlet.http.HttpServletResponse
 class SecurityConfig : WebSecurityConfigurerAdapter() {
 
     @Autowired
-    lateinit var customUserService: IUserRepository
+    @Qualifier("customUserService")
+    lateinit var userDetailsService: UserDetailsService
+
+    @Bean
+    fun passwordEncoder(): PasswordEncoder {
+        return BCryptPasswordEncoder()
+    }
+
+    @Bean
+    fun authProvider(): DaoAuthenticationProvider {
+        val authProvider = DaoAuthenticationProvider()
+        authProvider.setUserDetailsService(userDetailsService)
+        authProvider.setPasswordEncoder(passwordEncoder())
+        return authProvider
+    }
 
     @Bean
     fun successHandler(): AuthenticationSuccessHandler {
@@ -83,8 +99,9 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
 //                .withUser("user").password("{noop}pwd").roles("USER").and()
 //                .withUser("admin").password("{noop}pwd").roles("ADMIN")
 
-        auth!!.userDetailsService<UserDetailsService>(UserDetailsService {
-            username -> customUserService.findByUserName(username)
-        })
+//        auth!!.userDetailsService<UserDetailsService>(UserDetailsService {
+//            username -> customUserService.findByUserName(username)
+//        })
+        auth!!.userDetailsService<UserDetailsService>(userDetailsService)
     }
 }
