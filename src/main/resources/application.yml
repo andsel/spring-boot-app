@@ -2,12 +2,24 @@ security:
   user:
     password: password
 
-#logging:
-#  level:
-#    org.springframework.web: DEBUG
+logging:
+  level:
+    #org.springframework.web: DEBUG
+    #com.zaxxer.hikari.pool.HikariPool: DEBUG
+    com.zaxxer.hikari.pool: DEBUG
 
-# To disable thymeleaf caching, only for development
+#H2Console
 spring:
+  h2:
+    console:
+      enabled: true
+      path: /admin/h2console
+
+---
+
+spring:
+  profiles: dev
+  # To disable thymeleaf caching, only for development
   thymeleaf:
     cache: false
   datasource:
@@ -15,8 +27,15 @@ spring:
     schema: classpath:sql/schema.sql
     data: classpath:sql/data.sql
 
-#H2Console
-#  h2:
-#    console:
-#      enabled: true
-#      path: /h2console
+---
+
+spring:
+  profiles: prod
+
+  datasource:
+    url: jdbc:h2:file:/tmp/kilim
+    username: sa
+    password:
+    initialize: true
+    schema: classpath:sql/schema.sql
+    #data: classpath:sql/data.sql
