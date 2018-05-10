@@ -3,5 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
  username varchar(200) NOT NULL,
  password varchar(200) NOT NULL,
  role varchar(32) NOT NULL,
+ enabled boolean DEFAULT false,
+ locked boolean DEFAULT false,
  PRIMARY KEY (id)
 );

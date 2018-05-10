@@ -26,7 +26,7 @@ class AdminController @Autowired constructor(val users: IUserRepository) {
         val pagination: PageRequest
         val size = 10
         if (page != null) {
-            pagination = PageRequest.of(page - 1, size)
+            pagination = PageRequest.of(Math.max(0, page - 1), size)
         } else {
             pagination = PageRequest.of(0, size)
         }

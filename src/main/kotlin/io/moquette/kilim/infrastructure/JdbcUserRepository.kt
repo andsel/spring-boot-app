@@ -39,8 +39,10 @@ internal class JdbcUserRepository @Autowired constructor(val jdbc: NamedParamete
 
 private class UserMapper: RowMapper<User> {
     override fun mapRow(rs: ResultSet, runNum: Int): User? {
-        return User(rs.getString("username"), rs.getString("password"),
-                    rs.getString("role"))
+        val user = User(rs.getString("username"), rs.getString("password"),
+                rs.getString("role"), rs.getBoolean("enabled"),
+                rs.getBoolean("locked"))
+        return user
     }
 }
 

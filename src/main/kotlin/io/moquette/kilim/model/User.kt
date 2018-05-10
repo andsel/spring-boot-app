@@ -5,7 +5,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import java.util.*
 
-class User(val login: String, val pwd: String, val role: String) : UserDetails {
+class User(val login: String, val pwd: String, val role: String, val accountEnabled: Boolean,
+           val accountLocked: Boolean) : UserDetails {
 
     override fun getUsername(): String {
         return login
@@ -16,7 +17,7 @@ class User(val login: String, val pwd: String, val role: String) : UserDetails {
     }
 
     override fun isEnabled(): Boolean {
-        return true
+        return accountEnabled
     }
 
     override fun isCredentialsNonExpired(): Boolean {
@@ -28,7 +29,11 @@ class User(val login: String, val pwd: String, val role: String) : UserDetails {
     }
 
     override fun isAccountNonLocked(): Boolean {
-        return true
+        return !accountLocked
+    }
+
+    fun isBlocked(): Boolean {
+        return !(isAccountNonLocked || isEnabled)
     }
 
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
