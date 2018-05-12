@@ -4,8 +4,11 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import java.util.*
+import javax.validation.constraints.NotNull
+import javax.validation.constraints.Size
 
-class User(val login: String, val pwd: String, val role: String, val accountEnabled: Boolean,
+class User(@get:NotNull @get:Size(min=2, max=30) val login: String,
+           val pwd: String, val role: String, val accountEnabled: Boolean,
            val accountLocked: Boolean) : UserDetails {
 
     override fun getUsername(): String {
