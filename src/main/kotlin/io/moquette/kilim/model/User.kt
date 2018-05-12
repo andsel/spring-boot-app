@@ -7,7 +7,8 @@ import java.util.*
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Size
 
-class User(@get:NotNull @get:Size(min=2, max=30) val login: String,
+class User(val id: Int?,
+           @get:NotNull @get:Size(min=2, max=30) val login: String,
            val pwd: String, val role: String, val accountEnabled: Boolean,
            val accountLocked: Boolean) : UserDetails {
 

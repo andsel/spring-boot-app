@@ -11,7 +11,6 @@ import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
-
 @Controller
 @RequestMapping("/admin")
 class AdminController @Autowired constructor(val users: IUserRepository) {
@@ -43,7 +42,7 @@ class AdminController @Autowired constructor(val users: IUserRepository) {
 
     @GetMapping("/users")
     fun showNewUser(model: Model): String {
-        model.addAttribute("newUser", User("", "", "", false, false))
+        model.addAttribute("newUser", User(null, "", "", "", false, false))
         return "admin/users/create"
     }
 
@@ -67,5 +66,33 @@ class AdminController @Autowired constructor(val users: IUserRepository) {
         return "redirect:list"
     }
 
-    // TODO edit user like enable or block
+    @GetMapping("/user")
+    fun showUser(@RequestParam id: Int, model: Model): String {
+        val user = users.findByKey(id)
+        if (user == null) {
+            //TODO report a problem
+            return "redirect:list"
+        }
+        model.addAttribute("editUser", user)
+        return "admin/users/edit"
+    }
+
+    @PostMapping("/user")
+    fun submitUserEdit(@RequestParam id: Int,
+//                       result: BindingResult,
+                       editedUser: User,
+                       model: Model): String {
+        LOG.info("submitUserEdit invoked with $editedUser")
+//        if (result.hasErrors()) {
+//            model.addAttribute("editUser", editedUser)
+//            return "admin/users/edit"
+//        }
+        val user = users.findByKey(id)
+        val updatedUser = User(id, user!!.username, user.password, editedUser.role, editedUser.accountEnabled,
+                               editedUser.accountLocked)
+        users.save(updatedUser)
+        return "redirect:list"
+    }
+
 }
+

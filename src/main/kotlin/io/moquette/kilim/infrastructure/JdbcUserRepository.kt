@@ -20,12 +20,9 @@ import java.util.*
 import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.jdbc.support.KeyHolder
 
-
-
 @Repository
 internal class JdbcUserRepository @Autowired constructor(val jdbc: NamedParameterJdbcTemplate,
                                                          val pwdEncoder: PasswordEncoder) : IUserRepository {
-
     private val LOG = LoggerFactory.getLogger(JdbcUserRepository::class.java)
 
     private val MAPR = UserMapper()
@@ -33,6 +30,11 @@ internal class JdbcUserRepository @Autowired constructor(val jdbc: NamedParamete
     override fun findByUserName(username: String): UserDetails? {
         val params: SqlParameterSource = MapSqlParameterSource("username", username)
         return this.jdbc.queryForObject("SELECT * FROM users WHERE username=:username", params, MAPR)
+    }
+
+    override fun findByKey(id: Int): UserDetails? {
+        val params: SqlParameterSource = MapSqlParameterSource("id", id)
+        return this.jdbc.queryForObject("SELECT * FROM users WHERE id=:id", params, MAPR)
     }
 
     @Transactional
@@ -52,19 +54,26 @@ internal class JdbcUserRepository @Autowired constructor(val jdbc: NamedParamete
                 .addValue("role", user.role)
                 .addValue("enabled", user.accountEnabled)
                 .addValue("locked", user.accountLocked)
-        val keyHolder = GeneratedKeyHolder()
-        jdbc.update("INSERT INTO users (id, username, password, role, enabled, locked) VALUES " +
+        if (user.id != null) {
+            params.addValue("id", user.id)
+            jdbc.update("UPDATE users SET username=:username, password=:encodedPwd, role=:role, " +
+                        "       enabled=:enabled, locked=:locked WHERE id=:id", params)
+            LOG.debug("Saved user with key {}", user.id)
+        } else {
+            val keyHolder = GeneratedKeyHolder()
+            jdbc.update("INSERT INTO users (id, username, password, role, enabled, locked) VALUES " +
                     "(null, :username, :encodedPwd, :role, :enabled, :locked)", params, keyHolder)
 
-        LOG.debug("SAved user with key {}", keyHolder.key)
+            LOG.debug("Saved user with key {}", keyHolder.key)
+        }
     }
 }
 
 private class UserMapper: RowMapper<User> {
     override fun mapRow(rs: ResultSet, runNum: Int): User? {
-        val user = User(rs.getString("username"), rs.getString("password"),
-                rs.getString("role"), rs.getBoolean("enabled"),
-                rs.getBoolean("locked"))
+        val user = User(rs.getInt("id"), rs.getString("username"),
+                        rs.getString("password"), rs.getString("role"),
+                        rs.getBoolean("enabled"), rs.getBoolean("locked"))
         return user
     }
 }

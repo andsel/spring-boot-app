@@ -8,6 +8,8 @@ interface IUserRepository {
 
     fun findByUserName(username: String): UserDetails?
 
+    fun findByKey(id: Int): UserDetails?
+
     fun listAll(pagination: Pageable): Page<User>
 
     fun save(user: User)
