@@ -59,7 +59,7 @@ class SecurityConfig : WebSecurityConfigurerAdapter() {
                 }
 
                 return when {
-                    isUser -> "/projects"
+                    isUser -> "/devices/list"
                     isAdmin -> "/admin/console"
                     else -> throw IllegalStateException()
                 }
