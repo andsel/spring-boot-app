@@ -12,7 +12,7 @@
     <meta name="author" content=""/>
     <link rel="icon" href="../../favicon.ico"/>
 
-    <title>Kilim, admin list all users</title>
+    <title>Kilim, admin console</title>
 
     <!-- Bootstrap core CSS -->
     <!--<link href="css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" rel="stylesheet"/>-->
@@ -63,68 +63,37 @@
 <div class="container">
     <div class="row">
         <div class="col-md-3 col-md-offset-8">
-            <a class="btn btn-primary" href="create">New device</a>
+            <a class="btn btn-primary btn-sm" href="list">Back</a>
         </div>
     </div>
 
     <div class="row">
-        <!--<div class="col-md-6 col-md-offset-3">-->
-            <!--Total users: <span th:text="${users.totalElements}"/>-->
-        <!--</div>-->
-
-        <!--<div class="col-md-6 col-md-offset-3">-->
-            <!--<nav th:if="${users.totalPages != 1}" aria-label="Users pagination">-->
-                <!--<ul class="pagination">-->
-                    <!--<li th:class="${users.number == 0} ? disabled">-->
-                        <!--<a class="page-link" th:href="@{/admin/list(pageSize=${selectedPageSize}, page=1)}">&laquo;</a>-->
-                    <!--</li>-->
-                    <!--<li th:class="${users.number == 0} ? disabled">-->
-                        <!--<a class="page-link" th:href="@{/admin/list(pageSize=${selectedPageSize}, page=${users.number})}">&larr;</a>-->
-                    <!--</li>-->
-
-                    <!--<li th:class="${users.number == (page - 1)} ? 'active pointer-disabled'"-->
-                        <!--th:each="page : ${#numbers.sequence(pager.startPage, pager.endPage)}">-->
-                        <!--<a class="page-link" th:href="@{/admin/list(pageSize=${selectedPageSize}, page=${page})}"-->
-                           <!--th:text="${page}"></a>-->
-                    <!--</li>-->
-
-                    <!--<li th:class="${users.number + 1 == users.totalPages} ? disabled">-->
-                        <!--<a class="page-link"-->
-                           <!--th:href="@{/admin/list(pageSize=${selectedPageSize}, page=${users.number + 2})}">&rarr;</a>-->
-                    <!--</li>-->
-                    <!--<li th:class="${users.number + 1 == users.totalPages} ? disabled">-->
-                        <!--<a class="page-link"-->
-                           <!--th:href="@{/admin/list(pageSize=${selectedPageSize}, page=${users.totalPages})}">&raquo;</a>-->
-                    <!--</li>-->
-                <!--</ul>-->
-            <!--</nav>-->
-        <!--</div>-->
-
         <div class="col-md-6 col-md-offset-3">
-            <table class="table table-hover">
+            <form class="form-horizontal" th:object="${device}">
+                <div th:class="${#fields.hasErrors('clientId') ? 'form-group has-error' : 'form-group'}">
+                    <label for="inputClientId" class="col-sm-2 control-label">ClientId</label>
+                    <p id="inputClientId" class="form-control-static"><span th:text="*{clientId}"/></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <table class="table table-striped">
                 <thead>
-                    <tr >
-                        <th scope="col">ClientId</th>
-                        <th scope="col">Username</th>
-                        <th scope="col">Password</th>
-                        <th scope="col">Actions</th>
-                    </tr>
+                <tr >
+                    <th scope="col">Messages received</th>
+                </tr>
                 </thead>
-                <tbody th:each="device : ${devices}">
-                    <tr>
-                        <td>
-                            <a th:href="@{/devices/{clientId}(clientId=${device.clientId})}">
-                                <span th:text="${device.clientId}">ClientId</span>
-                            </a>
-                        </td>
-                        <td>Username</td>
-                        <td>Password</td>
-                        <td>
-                            <a th:href="@{/devices/edit/{clientId}(clientId=${device.clientId})}" class="btn btn-default">
-                                Edit
-                            </a>
-                        </td>
-                    </tr>
+                <tbody th:each="message : ${device.messages}">
+                <tr>
+                    <td>
+                        <!--<a th:href="@{/admin/user(id=${user.id})}">-->
+                            <span th:text="${message.body}">Username</span>
+                        <!--</a>-->
+                    </td>
+                </tr>
                 </tbody>
             </table>
         </div>
