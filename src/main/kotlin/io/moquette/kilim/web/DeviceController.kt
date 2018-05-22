@@ -9,10 +9,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Size
@@ -32,12 +29,37 @@ class DeviceController @Autowired constructor(val devices: IDeviceRepository) {
         return "devices/list"
     }
 
-    @GetMapping("/{clientId}")
-    fun showDevice(@PathVariable clientId: String,
+    @GetMapping("/device")
+    fun showDevice(@RequestParam clientId: String,
                    model: Model): String {
-        var device: Device = devices.findByClientId(clientId)
+        val device: Device = devices.findByClientId(clientId)
         model.addAttribute("device", device)
-        return "devices/show.html"
+        return "devices/show"
+    }
+
+    @GetMapping("/create")
+    fun createDevice(model: Model): String {
+        model.addAttribute("device", DeviceDTO("", "", "", ""))
+        return "devices/create"
+    }
+
+    @PostMapping("/device")
+    fun submitCreateDevice(@Valid updatedDevice: DeviceDTO,
+                           result: BindingResult,
+                           model: Model): String {
+        LOG.info("submitCrateDevice new data: {}",  updatedDevice)
+        model.addAttribute("device", updatedDevice)
+
+        if (!updatedDevice.assertNewPasswordTypeCorrectly()) {
+            result.rejectValue("newPassword", "Retyped passwords doesn't match")
+            result.rejectValue("repeatedNewPassword", "Retyped passwords doesn't match")
+            return "devices/edit"
+        }
+
+        // TODO check the oldPassword match
+        // TODO encode the password stored on DB
+        devices.update(Device(updatedDevice.clientId, updatedDevice.repeatedNewPassword))
+        return "redirect:list"
     }
 
     @GetMapping("/edit/{clientId}")
@@ -45,29 +67,29 @@ class DeviceController @Autowired constructor(val devices: IDeviceRepository) {
                    model: Model): String {
         val device: Device = devices.findByClientId(clientId)
         model.addAttribute("device", asDto(device))
-        return "devices/edit.html"
+        return "devices/edit"
     }
 
-    @PostMapping("/{clientId}")
-    fun submitDevice(@PathVariable clientId: String,
-                     @Valid updatedDevice: DeviceDTO,
-                     result: BindingResult,
-                     model: Model): String {
-        LOG.info("submitDevice update to clientId: {}, updated data: {}", clientId, updatedDevice)
+    @PostMapping("/device/{clientId}")
+    fun submitUpdateDevice(@PathVariable clientId: String,
+                           @Valid updatedDevice: DeviceDTO,
+                           result: BindingResult,
+                           model: Model): String {
+        LOG.info("submitUpdateDevice update to clientId: {}, updated data: {}", clientId, updatedDevice)
         model.addAttribute("device", updatedDevice)
         if (result.hasErrors()) {
-            return "devices/edit.html"
+            return "devices/edit"
         }
         if (!updatedDevice.assertNewPasswordTypeCorrectly()) {
             result.rejectValue("newPassword", "Retyped passwords doesn't match")
             result.rejectValue("repeatedNewPassword", "Retyped passwords doesn't match")
-            return "devices/edit.html"
+            return "devices/edit"
         }
 
         // TODO check the oldPassword match
         // TODO encode the password stored on DB
         devices.update(Device(clientId, updatedDevice.repeatedNewPassword))
-        return "redirect:list"
+        return "redirect:/devices/list"
     }
 
     private fun asDto(device: Device): DeviceDTO {
