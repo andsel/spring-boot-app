@@ -2,6 +2,7 @@ package io.moquette.kilim.infrastructure
 
 import io.moquette.kilim.model.Device
 import io.moquette.kilim.model.IDeviceRepository
+import io.moquette.kilim.model.Message
 import io.moquette.kilim.model.User
 import jetbrains.exodus.entitystore.Entity
 import jetbrains.exodus.entitystore.PersistentEntityStore
@@ -36,7 +37,16 @@ internal class XodusDeviceRepository : IDeviceRepository, InitializingBean, Disp
             Assert.isTrue(!iterable.isEmpty, "One device must be present with clientId: $clientId")
             val deviceXd: Entity = iterable.first!!
             val password: String = deviceXd.getProperty("password") as String
-            Device(clientId, password)
+
+            val deviceReceiveMessages = ArrayList<Message>()
+
+            for (messageXd in deviceXd.getLinks("messages")) {
+                val message = Message(messageXd.getProperty("body") as String)
+                deviceReceiveMessages.add(message)
+            }
+            val device = Device(clientId, password)
+            device.messages = deviceReceiveMessages
+            device
         }!!
     }
 
@@ -50,9 +60,24 @@ internal class XodusDeviceRepository : IDeviceRepository, InitializingBean, Disp
                 deviceXd.setProperty("password", device.password)
             } else {
                 // update
-                val deviceXd = iterable.first
-                deviceXd!!.setProperty("password", device.password)
+                val deviceXd = iterable.first!!
+                deviceXd.setProperty("password", device.password)
             }
+        }
+    }
+
+    override fun addMessage(clientId: String, message: Message) {
+        entityStore.executeInTransaction { txn ->
+            val iterable = txn.find("Device", "clientId", clientId)
+            if (iterable.isEmpty) {
+                return@executeInTransaction
+            }
+            val deviceXd = iterable.first!!
+
+            val messageXd = txn.newEntity("Message")
+            messageXd.setProperty("body", message.body)
+            deviceXd.addLink("messages", messageXd)
+            messageXd.setLink("device", deviceXd)
         }
     }
 

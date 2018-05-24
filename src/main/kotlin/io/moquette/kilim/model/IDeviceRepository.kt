@@ -7,4 +7,6 @@ interface IDeviceRepository {
     fun findByClientId(clientId: String): Device
 
     fun update(device: Device)
+
+    fun addMessage(device: String, message: Message)
 }

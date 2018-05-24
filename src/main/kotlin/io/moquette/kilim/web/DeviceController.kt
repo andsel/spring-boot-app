@@ -2,6 +2,7 @@ package io.moquette.kilim.web
 
 import io.moquette.kilim.model.Device
 import io.moquette.kilim.model.IDeviceRepository
+import io.moquette.kilim.model.Message
 import io.moquette.kilim.model.User
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -59,6 +60,10 @@ class DeviceController @Autowired constructor(val devices: IDeviceRepository) {
         // TODO check the oldPassword match
         // TODO encode the password stored on DB
         devices.update(Device(updatedDevice.clientId, updatedDevice.repeatedNewPassword))
+        devices.addMessage(updatedDevice.clientId, Message("first message received"))
+        devices.addMessage(updatedDevice.clientId, Message("second message received"))
+        devices.addMessage(updatedDevice.clientId, Message("third message received"))
+        devices.addMessage(updatedDevice.clientId, Message("forth message received"))
         return "redirect:list"
     }
 
