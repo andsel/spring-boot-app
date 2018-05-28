@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-class BrokerService @Autowired constructor(val xodusAuthenticator: IAuthenticator)
+class BrokerService @Autowired constructor(val xodusAuthenticator: IAuthenticator, val collector: MessagesCollector)
     : InitializingBean, DisposableBean {
 
     lateinit var mqttBroker: Server
@@ -29,9 +29,8 @@ class BrokerService @Autowired constructor(val xodusAuthenticator: IAuthenticato
         val brokerConfig = MemoryConfig(props)
 
         val mqttBroker = Server()
-//        val userHandlers = Collections.singletonList(PublisherListener())
-        mqttBroker.startServer(brokerConfig, null, null, xodusAuthenticator, null)
-
+        val userHandlers = Collections.singletonList(collector)
+        mqttBroker.startServer(brokerConfig, userHandlers, null, xodusAuthenticator, null)
     }
 
     override fun destroy() {

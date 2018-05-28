@@ -11,6 +11,10 @@ class Device(@get:NotNull val clientId: String,
         return this.username == username && this.password == String(password)
     }
 
+    fun receivedMessage(content: String) {
+        messages += Message(content)
+    }
+
     var messages: List<Message> = Collections.emptyList()
 }
 
