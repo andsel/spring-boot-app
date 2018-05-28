@@ -40,7 +40,7 @@ class DeviceController @Autowired constructor(val devices: IDeviceRepository) {
 
     @GetMapping("/create")
     fun createDevice(model: Model): String {
-        model.addAttribute("device", DeviceDTO("", "", "", ""))
+        model.addAttribute("device", DeviceDTO("", "", "", "", ""))
         return "devices/create"
     }
 
@@ -48,7 +48,7 @@ class DeviceController @Autowired constructor(val devices: IDeviceRepository) {
     fun submitCreateDevice(@Valid updatedDevice: DeviceDTO,
                            result: BindingResult,
                            model: Model): String {
-        LOG.info("submitCrateDevice new data: {}",  updatedDevice)
+        LOG.info("submitCreateDevice new data: {}",  updatedDevice)
         model.addAttribute("device", updatedDevice)
 
         if (!updatedDevice.assertNewPasswordTypeCorrectly()) {
@@ -59,7 +59,7 @@ class DeviceController @Autowired constructor(val devices: IDeviceRepository) {
 
         // TODO check the oldPassword match
         // TODO encode the password stored on DB
-        devices.update(Device(updatedDevice.clientId, updatedDevice.repeatedNewPassword))
+        devices.update(Device(updatedDevice.clientId, updatedDevice.username, updatedDevice.repeatedNewPassword))
         devices.addMessage(updatedDevice.clientId, Message("first message received"))
         devices.addMessage(updatedDevice.clientId, Message("second message received"))
         devices.addMessage(updatedDevice.clientId, Message("third message received"))
@@ -93,16 +93,16 @@ class DeviceController @Autowired constructor(val devices: IDeviceRepository) {
 
         // TODO check the oldPassword match
         // TODO encode the password stored on DB
-        devices.update(Device(clientId, updatedDevice.repeatedNewPassword))
+        devices.update(Device(clientId, updatedDevice.username, updatedDevice.repeatedNewPassword))
         return "redirect:/devices/list"
     }
 
     private fun asDto(device: Device): DeviceDTO {
-        return DeviceDTO(device.clientId, device.password, "", "")
+        return DeviceDTO(device.clientId, device.username, device.password, "", "")
     }
 }
 
-data class DeviceDTO(val clientId: String, val oldPassword: String,
+data class DeviceDTO(val clientId: String, val username: String, val oldPassword: String,
                      @get:NotNull @get:Size(min=2, max=8) val newPassword: String,
                      @get:NotNull @get:Size(min=2, max=8) val repeatedNewPassword: String) {
 

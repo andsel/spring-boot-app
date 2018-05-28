@@ -36,6 +36,7 @@ internal class XodusDeviceRepository : IDeviceRepository, InitializingBean, Disp
             val iterable = txn.find("Device", "clientId", clientId)
             Assert.isTrue(!iterable.isEmpty, "One device must be present with clientId: $clientId")
             val deviceXd: Entity = iterable.first!!
+            val username: String = deviceXd.getProperty("username") as String
             val password: String = deviceXd.getProperty("password") as String
 
             val deviceReceiveMessages = ArrayList<Message>()
@@ -44,7 +45,7 @@ internal class XodusDeviceRepository : IDeviceRepository, InitializingBean, Disp
                 val message = Message(messageXd.getProperty("body") as String)
                 deviceReceiveMessages.add(message)
             }
-            val device = Device(clientId, password)
+            val device = Device(clientId, username, password)
             device.messages = deviceReceiveMessages
             device
         }!!
@@ -57,10 +58,12 @@ internal class XodusDeviceRepository : IDeviceRepository, InitializingBean, Disp
                 // insert
                 val deviceXd = txn.newEntity("Device")
                 deviceXd.setProperty("clientId", device.clientId)
+                deviceXd.setProperty("username", device.username)
                 deviceXd.setProperty("password", device.password)
             } else {
                 // update
                 val deviceXd = iterable.first!!
+                deviceXd.setProperty("username", device.username)
                 deviceXd.setProperty("password", device.password)
             }
         }
@@ -88,10 +91,10 @@ internal class XodusDeviceRepository : IDeviceRepository, InitializingBean, Disp
             val devices = ArrayList<Device>()
             for (deviceEntity: Entity in iterable) {
                 val clientId: String = deviceEntity.getProperty("clientId") as String
+                val username: String = deviceEntity.getProperty("username") as String
                 val password: String = deviceEntity.getProperty("password") as String
-                devices.add(Device(clientId, password))
+                devices.add(Device(clientId, username, password))
             }
-
             devices
         }
     }

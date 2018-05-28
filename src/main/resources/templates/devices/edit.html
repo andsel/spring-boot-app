@@ -82,6 +82,12 @@
                     <input type="hidden" th:field="*{clientId}">
                 </div>
 
+                <div th:class="${#fields.hasErrors('username') ? 'form-group has-error' : 'form-group'}">
+                    <label for="inputUsername" class="col-sm-2 control-label">Username</label>
+                    <p id="inputUsername" class="form-control-static">
+                        <input type="text" th:field="*{username}">
+                </div>
+
                 <div th:class="${#fields.hasErrors('oldPassword') ? 'form-group has-error' : 'form-group'}">
                     <label for="inputOldPassword" class="col-sm-2 control-label">Old password</label>
                     <p id="inputOldPassword" class="form-control-static">

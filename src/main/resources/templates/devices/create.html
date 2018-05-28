@@ -72,6 +72,12 @@
                     <input type="hidden" th:field="*{oldPassword}" value="fake">
                 </div>
 
+                <div class="form-group">
+                    <label for="inputUsername" class="col-sm-2 control-label">Username</label>
+                    <p id="inputUsername" class="form-control-static">
+                        <input type="text" th:field="*{username}">
+                </div>
+
                 <div th:class="${#fields.hasErrors('newPassword') ? 'form-group has-error' : 'form-group'}">
                     <label for="inputNewPassword" class="col-sm-2 control-label">Password</label>
                     <p id="inputNewPassword" class="form-control-static">

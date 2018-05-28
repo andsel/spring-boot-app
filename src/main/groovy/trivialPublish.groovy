@@ -30,8 +30,9 @@
 @Grab(group='org.eclipse.paho', module='org.eclipse.paho.client.mqttv3', version='1.2.0')
 
 import org.eclipse.paho.client.mqttv3.MqttClient
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions
 import org.eclipse.paho.client.mqttv3.MqttMessage
-import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence
+//import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 
 if (args.length < 1) {
@@ -58,7 +59,17 @@ message.setQos(0)
 //MqttDefaultFilePersistence persistence = new MqttDefaultFilePersistence(tmpDir)
 MemoryPersistence persistence = new MemoryPersistence()
 MqttClient client = new MqttClient("tcp://${host}:1883", clientId, persistence)
-client.connect()
+
+def provideCredentials = true
+if (provideCredentials) {
+    MqttConnectOptions options = new MqttConnectOptions()
+    options.setUserName("dbuser")
+    options.setPassword("password".toCharArray())
+    client.connect(options)
+} else {
+    client.connect()
+}
+
 print "publishing at QoS 0"
 client.publish('log', 'Hello world!!'.bytes, 0, false)
 
