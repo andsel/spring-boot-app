@@ -80,25 +80,24 @@
 
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
-            <!--<div id="react" th:attr="data-projectId=${project.id}"></div>                -->
-            <div id="react"></div>
+            <div id="react" th:attr="data-clientId=${device.clientId}"></div>
+            <!--<table class="table table-striped">-->
+                <!--<thead>-->
+                <!--<tr>-->
+                    <!--<th scope="col">Messages received</th>-->
+                <!--</tr>-->
+                <!--</thead>-->
 
-            <table class="table table-striped">
-                <thead>
-                <tr >
-                    <th scope="col">Messages received</th>
-                </tr>
-                </thead>
-                <tbody th:each="message : ${device.messages}">
-                <tr>
-                    <td>
-                        <!--<a th:href="@{/admin/user(id=${user.id})}">-->
-                            <span th:text="${message.body}">Username</span>
-                        <!--</a>-->
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+                <!--<tbody th:each="message : ${device.messages}">-->
+                <!--<tr>-->
+                    <!--<td>-->
+                        <!--&lt;!&ndash;<a th:href="@{/admin/user(id=${user.id})}">&ndash;&gt;-->
+                            <!--<span th:text="${message.body}">Username</span>-->
+                        <!--&lt;!&ndash;</a>&ndash;&gt;-->
+                    <!--</td>-->
+                <!--</tr>-->
+                <!--</tbody>-->
+            <!--</table>-->
         </div>
     </div>
 

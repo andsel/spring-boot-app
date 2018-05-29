@@ -6,11 +6,13 @@ import io.moquette.kilim.model.Message
 import io.moquette.kilim.model.User
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.MediaType
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
+import java.util.stream.Collectors.toList
 import javax.validation.Valid
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Size
@@ -95,6 +97,14 @@ class DeviceController @Autowired constructor(val devices: IDeviceRepository) {
         // TODO encode the password stored on DB
         devices.update(Device(clientId, updatedDevice.username, updatedDevice.repeatedNewPassword))
         return "redirect:/devices/list"
+    }
+
+    @GetMapping(value = ["/API/messages/{clientId}"], produces = [(MediaType.APPLICATION_JSON_VALUE)])
+    @ResponseBody
+    fun listDeviceMessages(@PathVariable("clientId") clientId: String): List<String> {
+        LOG.info("device $clientId listing messages")
+        val device: Device = devices.findByClientId(clientId)
+        return device.messages.stream().map { m -> m.body }.collect(toList())
     }
 
     private fun asDto(device: Device): DeviceDTO {
