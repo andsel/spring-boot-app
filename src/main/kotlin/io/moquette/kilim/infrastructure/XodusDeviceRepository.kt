@@ -36,6 +36,7 @@ internal class XodusDeviceRepository : IDeviceRepository, InitializingBean, Disp
             val iterable = txn.find("Device", "clientId", clientId)
             Assert.isTrue(!iterable.isEmpty, "One device must be present with clientId: $clientId")
             val deviceXd: Entity = iterable.first!!
+            val login: String = deviceXd.getProperty("login") as String
             val username: String = deviceXd.getProperty("username") as String
             val password: String = deviceXd.getProperty("password") as String
 
@@ -45,7 +46,7 @@ internal class XodusDeviceRepository : IDeviceRepository, InitializingBean, Disp
                 val message = Message(messageXd.getProperty("body") as String)
                 deviceReceiveMessages.add(message)
             }
-            val device = Device(clientId, username, password)
+            val device = Device(login, clientId, username, password)
             device.messages = deviceReceiveMessages
             device
         }!!
@@ -55,8 +56,10 @@ internal class XodusDeviceRepository : IDeviceRepository, InitializingBean, Disp
         entityStore.executeInTransaction { txn ->
             val iterable = txn.find("Device", "clientId", device.clientId)
             if (iterable.isEmpty) {
+                Assert.isTrue(device.userLogin.isNotEmpty(), "During insertion Device MUST have a login")
                 // insert
                 val deviceXd = txn.newEntity("Device")
+                deviceXd.setProperty("login", device.userLogin)
                 deviceXd.setProperty("clientId", device.clientId)
                 deviceXd.setProperty("username", device.username)
                 deviceXd.setProperty("password", device.password)
@@ -90,10 +93,11 @@ internal class XodusDeviceRepository : IDeviceRepository, InitializingBean, Disp
             val iterable = txn.getAll("Device")
             val devices = ArrayList<Device>()
             for (deviceEntity: Entity in iterable) {
+                val login: String = deviceEntity.getProperty("login") as String
                 val clientId: String = deviceEntity.getProperty("clientId") as String
                 val username: String = deviceEntity.getProperty("username") as String
                 val password: String = deviceEntity.getProperty("password") as String
-                devices.add(Device(clientId, username, password))
+                devices.add(Device(login, clientId, username, password))
             }
             devices
         }

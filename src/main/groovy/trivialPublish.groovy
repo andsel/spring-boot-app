@@ -71,7 +71,7 @@ if (provideCredentials) {
 }
 
 print "publishing at QoS 0"
-client.publish('log', 'Hello world!!'.bytes, 0, false)
+client.publish('log', messageContent.bytes, 0, false)
 
 //client.publish('/exit', 'Exit'.bytes, 0, false)
 client.disconnect()

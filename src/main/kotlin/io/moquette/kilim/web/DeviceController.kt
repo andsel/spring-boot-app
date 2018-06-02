@@ -47,7 +47,8 @@ class DeviceController @Autowired constructor(val devices: IDeviceRepository) {
     }
 
     @PostMapping("/device")
-    fun submitCreateDevice(@Valid updatedDevice: DeviceDTO,
+    fun submitCreateDevice(authentication: Authentication,
+                           @Valid updatedDevice: DeviceDTO,
                            result: BindingResult,
                            model: Model): String {
         LOG.info("submitCreateDevice new data: {}",  updatedDevice)
@@ -61,7 +62,10 @@ class DeviceController @Autowired constructor(val devices: IDeviceRepository) {
 
         // TODO check the oldPassword match
         // TODO encode the password stored on DB
-        devices.update(Device(updatedDevice.clientId, updatedDevice.username, updatedDevice.repeatedNewPassword))
+        val user: User = authentication.principal as User
+        val device = Device(user.login, updatedDevice.clientId, updatedDevice.username,
+                            updatedDevice.repeatedNewPassword)
+        devices.update(device)
         devices.addMessage(updatedDevice.clientId, Message("first message received"))
         devices.addMessage(updatedDevice.clientId, Message("second message received"))
         devices.addMessage(updatedDevice.clientId, Message("third message received"))
@@ -95,7 +99,7 @@ class DeviceController @Autowired constructor(val devices: IDeviceRepository) {
 
         // TODO check the oldPassword match
         // TODO encode the password stored on DB
-        devices.update(Device(clientId, updatedDevice.username, updatedDevice.repeatedNewPassword))
+        devices.update(Device("", clientId, updatedDevice.username, updatedDevice.repeatedNewPassword))
         return "redirect:/devices/list"
     }
 

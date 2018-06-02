@@ -20,11 +20,28 @@ class MessageList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {messages: []};
+    this.onNewMessageReceive = this.onNewMessageReceive.bind(this);
   }
 
   componentDidMount() {
     axios.get('/devices/API/messages/' + this.props.clientid)
       .then((response) => this.receivedMessagesList(response));
+
+    var url = 'ws://' + window.location.host + '/websocket/messages';
+    this.websocket = new WebSocket(url);
+    this.websocket.onmessage = this.onNewMessageReceive;
+    /*this.websocket.onmessage = function(evt) {
+      // add the new message to state
+      this.setState({
+        messages : this.state.messages.concat([ evt.data ])
+      })
+    }*/
+  }
+
+  onNewMessageReceive(evt) {
+    this.setState({
+      messages : this.state.messages.concat([ evt.data ])
+    });
   }
 
   receivedMessagesList(response) {
