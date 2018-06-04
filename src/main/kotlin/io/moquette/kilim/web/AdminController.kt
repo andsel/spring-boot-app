@@ -1,5 +1,6 @@
 package io.moquette.kilim.web
 
+import io.moquette.kilim.model.IAdminNotificator
 import io.moquette.kilim.model.IUserRepository
 import io.moquette.kilim.model.User
 import org.slf4j.LoggerFactory
@@ -14,7 +15,8 @@ import javax.validation.Valid
 
 @Controller
 @RequestMapping("/admin")
-class AdminController @Autowired constructor(val users: IUserRepository) {
+class AdminController @Autowired constructor(val users: IUserRepository,
+                                             val notificator: IAdminNotificator) {
 
     private val LOG = LoggerFactory.getLogger(AdminController::class.java)
 
@@ -57,7 +59,7 @@ class AdminController @Autowired constructor(val users: IUserRepository) {
             return "admin/users/create"
         }
 //        try {
-            users.save(newUser)
+        users.save(newUser)
 //        } catch (daex: DataAccessException) {
 //            result.rejectValue("global", "global.error", "Something bad happened storing the data, retry later")
 //            LOG.error("Error saving user", daex)
