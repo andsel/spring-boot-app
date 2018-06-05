@@ -7,16 +7,20 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
+import org.springframework.mail.SimpleMailMessage
+
+
 
 @Controller
 @RequestMapping("/admin")
 class AdminController @Autowired constructor(val users: IUserRepository,
-                                             val notificator: IAdminNotificator) {
+                                             val emailSender: JavaMailSender) {
 
     private val LOG = LoggerFactory.getLogger(AdminController::class.java)
 
@@ -94,6 +98,17 @@ class AdminController @Autowired constructor(val users: IUserRepository,
         val updatedUser = User(id, user!!.username, user.password, editedUser.role, editedUser.accountEnabled,
                                editedUser.accountLocked)
         users.save(updatedUser)
+
+        if (!user.isEnabled && editedUser.accountEnabled) {
+            // TODO email sending must be done in asynch
+            // if there is a switch in enabled from false -> true
+            val message = SimpleMailMessage()
+            message.setTo(editedUser.login)
+            message.setSubject("Welcome in Kilim")
+            message.setText("Your registration request has been accepted, thanks a lot for your interest into the " +
+                            "Moquette MQTT Saas")
+            emailSender.send(message)
+        }
         return "redirect:list"
     }
 
