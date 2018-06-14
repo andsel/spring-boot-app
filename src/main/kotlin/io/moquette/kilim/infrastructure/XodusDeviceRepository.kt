@@ -1,5 +1,6 @@
 package io.moquette.kilim.infrastructure
 
+import io.moquette.kilim.config.ApplicationConfig
 import io.moquette.kilim.model.Device
 import io.moquette.kilim.model.IDeviceRepository
 import io.moquette.kilim.model.Message
@@ -9,26 +10,48 @@ import jetbrains.exodus.entitystore.PersistentEntityStore
 import jetbrains.exodus.entitystore.PersistentEntityStores
 import jetbrains.exodus.env.Environment
 import jetbrains.exodus.env.Environments
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 import org.springframework.util.Assert
+import java.io.File
+import java.nio.file.Files
 
 
 @Repository
-internal class XodusDeviceRepository : IDeviceRepository, InitializingBean, DisposableBean {
+internal class XodusDeviceRepository @Autowired constructor(val config: ApplicationConfig,
+                                                            val springEnv: org.springframework.core.env.Environment):
+        IDeviceRepository, InitializingBean, DisposableBean {
+
+    private val LOG = LoggerFactory.getLogger(XodusDeviceRepository::class.java)
 
     lateinit var env: Environment
     lateinit var entityStore: PersistentEntityStore
 
     override fun afterPropertiesSet() {
-        env = Environments.newInstance("/tmp/kilimData")
+        LOG.debug("path from config: {}", config.path)
+
+        if (springEnv.activeProfiles.contains("dev")) {
+            val devTempDir = Files.createTempDirectory("dev_kilim_xodus")!!
+            env = Environments.newInstance(devTempDir.toFile())
+        } else {
+            env = Environments.newInstance(config.path)
+        }
         entityStore = PersistentEntityStores.newInstance(env, "devices")
     }
 
     override fun destroy() {
         entityStore.close()
+        val storeDir = env.location
         env.close()
+
+        // in dev, delete the temp directory
+        if (springEnv.activeProfiles.contains("dev")) {
+            val dir = File(storeDir)
+            dir.delete()
+        }
     }
 
     override fun findByClientId(clientId: String): Device {
