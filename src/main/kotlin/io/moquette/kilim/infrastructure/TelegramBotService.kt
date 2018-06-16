@@ -1,21 +1,23 @@
 package io.moquette.kilim.infrastructure
 
+import io.moquette.kilim.config.ApplicationConfig
 import io.moquette.kilim.model.IAdminNotificator
 import io.moquette.kilim.model.User
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.WebClient
 
 @Component
-class TelegramBotService : IAdminNotificator {
+class TelegramBotService @Autowired constructor(val config: ApplicationConfig): IAdminNotificator {
 
     private val LOG = LoggerFactory.getLogger(TelegramBotService::class.java)
 
     override fun newUserRegistered(user: User) {
-        val urlVariables = hashMapOf("botToken" to "391251051:AAE6NhJTpEwOVWxx1wI1baUbZbIVPLoGsCY",
-                "groupId" to "-253056505",
+        val urlVariables = hashMapOf("botToken" to config.telegramToken,
+                "groupId" to config.telegramGroupId,
                 "message" to "New registration request from ${user.login}")
 
         WebClient.create("https://api.telegram.org")

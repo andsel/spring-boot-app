@@ -19,8 +19,10 @@ spring:
     port: 2525
     protocol: smtp
 
-xodus:
-  path: /tmp/kilimData
+kilim:
+  xodusPath: /tmp/kilimData
+  telegramToken: ****
+  telegramGroupId: ****
 
 ---
 
@@ -37,7 +39,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: kilim.saas@gmail.com
-    password: *******
+    password: zipiri77
     properties:
       mail:
         smtp:

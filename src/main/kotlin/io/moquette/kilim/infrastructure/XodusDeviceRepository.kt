@@ -31,13 +31,13 @@ internal class XodusDeviceRepository @Autowired constructor(val config: Applicat
     lateinit var entityStore: PersistentEntityStore
 
     override fun afterPropertiesSet() {
-        LOG.debug("path from config: {}", config.path)
+        LOG.debug("path from config: {}", config.xodusPath)
 
         if (springEnv.activeProfiles.contains("dev")) {
             val devTempDir = Files.createTempDirectory("dev_kilim_xodus")!!
             env = Environments.newInstance(devTempDir.toFile())
         } else {
-            env = Environments.newInstance(config.path)
+            env = Environments.newInstance(config.xodusPath)
         }
         entityStore = PersistentEntityStores.newInstance(env, "devices")
     }

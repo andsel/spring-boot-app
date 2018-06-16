@@ -4,7 +4,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
 
 @Component
-@ConfigurationProperties("xodus")
+@ConfigurationProperties("kilim")
 class ApplicationConfig {
-    lateinit var path: String
+    lateinit var xodusPath: String
+    lateinit var telegramToken: String
+    lateinit var telegramGroupId: String
 }
