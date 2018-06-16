@@ -14,6 +14,13 @@ spring:
     console:
       enabled: true
       path: /admin/h2console
+  mail:
+    host: localhost
+    port: 2525
+    protocol: smtp
+
+xodus:
+  path: /tmp/kilimData
 
 ---
 
@@ -26,6 +33,17 @@ spring:
     initialize: true
     schema: classpath:sql/schema.sql
     data: classpath:sql/data.sql
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: kilim.saas@gmail.com
+    password: *******
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 ---
 

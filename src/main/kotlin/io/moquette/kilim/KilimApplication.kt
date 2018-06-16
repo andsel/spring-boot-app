@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class KilimApplication
 
 fun main(args: Array<String>) {
-    runApplication<KilimApplication>(*args)
+    runApplication<KilimApplication>(*args /*"--debug"*/)
 }
